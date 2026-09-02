@@ -1,4 +1,5 @@
 {
+  "name": "racebox",
   "framework": "vite",
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }
