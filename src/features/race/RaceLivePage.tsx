@@ -335,6 +335,7 @@ export function RaceLivePage() {
             value={speed.value}
             max={settings.speedUnit === 'mph' ? 160 : 260}
             unit={speed.unit}
+            maxSpeed={metrics.maxSpeedMs * MS_TO_KMH}
           />
         </div>
 

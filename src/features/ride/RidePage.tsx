@@ -160,6 +160,7 @@ export function RidePage() {
               value={speed.value}
               max={settings.speedUnit === 'mph' ? 160 : 260}
               unit={speed.unit}
+              maxSpeed={(state?.maxSpeedMs ?? 0) * MS_TO_KMH}
             />
           </div>
 
