@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useGPS } from '@/hooks/useGPS'
 import { useSettings } from '@/hooks/useSettings'
 import { Button } from '@/components/Button'
+import { Speedometer } from '@/components/Speedometer'
 import { RaceEngine, type RaceEngineState } from './RaceEngine'
 import { db } from '@/lib/db/database'
 import type { RaceRecord } from '@/types'
@@ -329,18 +330,12 @@ export function RaceLivePage() {
           </p>
         </div>
 
-        <div className="mt-8">
-          <div className="flex items-baseline justify-center gap-1">
-            <span className="font-display text-6xl font-bold tabular-nums">
-              {speed.value.toFixed(0)}
-            </span>
-            <span className="text-sm font-semibold text-[var(--color-race-muted)]">
-              {speed.unit}
-            </span>
-          </div>
-          <p className="mt-1 text-xs uppercase tracking-widest text-[var(--color-race-muted)]">
-            speed
-          </p>
+        <div className="mt-6">
+          <Speedometer
+            value={speed.value}
+            max={settings.speedUnit === 'mph' ? 160 : 260}
+            unit={speed.unit}
+          />
         </div>
 
         <div className="mt-8">

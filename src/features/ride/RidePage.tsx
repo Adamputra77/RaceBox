@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useGPS } from '@/hooks/useGPS'
 import { useSettings } from '@/hooks/useSettings'
 import { Button } from '@/components/Button'
+import { Speedometer } from '@/components/Speedometer'
 import { RideRecorder, type RideState } from './RideRecorder'
 import { db } from '@/lib/db/database'
 import type { RideRecord } from '@/types'
@@ -154,18 +155,12 @@ export function RidePage() {
 
       {!finished ? (
         <div className="flex-1 text-center">
-          <div className="mt-6">
-            <div className="flex items-baseline justify-center gap-1">
-              <span className="font-display text-7xl font-bold tabular-nums text-glow-red">
-                {speed.value.toFixed(0)}
-              </span>
-              <span className="text-sm font-semibold text-[var(--color-race-muted)]">
-                {speed.unit}
-              </span>
-            </div>
-            <p className="mt-1 text-xs uppercase tracking-widest text-[var(--color-race-muted)]">
-              {recording ? 'current speed' : 'speed'}
-            </p>
+          <div className="mt-2">
+            <Speedometer
+              value={speed.value}
+              max={settings.speedUnit === 'mph' ? 160 : 260}
+              unit={speed.unit}
+            />
           </div>
 
           <div className="mx-auto mt-10 grid max-w-sm grid-cols-3 gap-3">
