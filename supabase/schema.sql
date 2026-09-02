@@ -67,6 +67,12 @@ create policy "users read own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
+-- Fallback: user bisa baca profile yang emailnya cocok dengan JWT-nya
+-- (berguna jika baris profile dibuat manual dan id-nya tidak cocok dgn auth uid)
+create policy "users read own profile by email"
+  on public.profiles for select
+  using (lower(auth.jwt() ->> 'email') = lower(email));
+
 -- Admin: bisa baca semua profile (via security definer, tanpa recursion)
 create policy "admin read all profiles"
   on public.profiles for select

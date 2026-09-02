@@ -30,20 +30,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle()
-    if (error) {
-      setProfile(null)
-      setProfileError(error.message)
-      return
-    }
-    setProfileError(null)
-    setProfile(data)
-  }, [])
+  const fetchProfile = useCallback(
+    async (userId: string, email?: string) => {
+      const byId = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+
+      let row: ProfileRow | null = byId.error ? null : byId.data
+
+      if (row == null && email) {
+        const byEmail = await supabase
+          .from('profiles')
+          .select('*')
+          .ilike('email', email)
+          .maybeSingle()
+        if (byEmail.error) {
+          setProfile(null)
+          setProfileError(byEmail.error.message)
+          return
+        }
+        row = byEmail.data
+      } else if (byId.error) {
+        setProfile(null)
+        setProfileError(byId.error.message)
+        return
+      }
+
+      setProfileError(null)
+      setProfile(row)
+    },
+    [],
+  )
 
   useEffect(() => {
     if (!session?.user) {
@@ -55,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(false)
-    void fetchProfile(session.user.id)
+    void fetchProfile(session.user.id, session.user.email)
   }, [session, fetchProfile])
 
   // Jika profil belum ketemu (mis. user dibuat manual / trigger belum jalan),
@@ -63,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!session?.user || profile) return
     const id = setInterval(() => {
-      void fetchProfile(session.user.id)
+      void fetchProfile(session.user.id, session.user.email)
     }, 2000)
     return () => clearInterval(id)
   }, [session, profile, fetchProfile])
@@ -94,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = useCallback(async () => {
     if (!session?.user) return
-    await fetchProfile(session.user.id)
+    await fetchProfile(session.user.id, session.user.email)
   }, [session, fetchProfile])
 
   let status: AuthStatus = 'loading'
