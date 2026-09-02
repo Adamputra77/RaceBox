@@ -14,6 +14,7 @@ export interface AuthContextValue {
   status: AuthStatus
   user: User | null
   profile: ProfileRow | null
+  profileError: string | null
   isAdmin: boolean
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>
   signIn: (email: string, password: string) => Promise<{ error: string | null }>

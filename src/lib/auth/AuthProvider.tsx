@@ -8,6 +8,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<ProfileRow | null>(null)
   const [loading, setLoading] = useState(true)
+  const [profileError, setProfileError] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -37,8 +38,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .maybeSingle()
     if (error) {
       setProfile(null)
+      setProfileError(error.message)
       return
     }
+    setProfileError(null)
     setProfile(data)
   }, [])
 
@@ -113,6 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         status,
         user: session?.user ?? null,
         profile,
+        profileError,
         isAdmin,
         signUp,
         signIn,

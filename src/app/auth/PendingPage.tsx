@@ -2,7 +2,7 @@ import { useAuth } from '@/lib/auth/useAuth'
 import { Button } from '@/components/Button'
 
 export function PendingPage() {
-  const { profile, user, signOut } = useAuth()
+  const { profile, profileError, user, signOut } = useAuth()
 
   const noDatabaseRow = profile == null && user != null
 
@@ -24,7 +24,12 @@ export function PendingPage() {
           Akun: {user.email}
         </p>
       )}
-      {noDatabaseRow && (
+      {profileError && (
+        <p className="mt-3 w-full max-w-xs rounded-lg border border-[var(--color-race-red)]/40 bg-[var(--color-race-card)] px-4 py-2 text-xs text-[var(--color-race-red2)]">
+          Gagal membaca data: {profileError}
+        </p>
+      )}
+      {noDatabaseRow && !profileError && (
         <p className="mt-3 w-full max-w-xs rounded-lg border border-[var(--color-race-red)]/40 bg-[var(--color-race-card)] px-4 py-2 text-xs text-[var(--color-race-red2)]">
           Data profil tidak ditemukan di database. Hubungi admin (mungkin akun
           belum terhubung ke baris profile, atau hak akses database bermasalah).
