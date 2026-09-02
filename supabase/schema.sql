@@ -1,0 +1,77 @@
+-- ============================================================
+-- RaceBox - Auth + Admin Approval Schema (Supabase/Postgres)
+-- Jalankan di Supabase Dashboard > SQL Editor
+-- ============================================================
+
+-- 1. Tabel profil pengguna
+create table if not exists public.profiles (
+  id uuid primary key references auth.users(id) on delete cascade,
+  email text,
+  full_name text,
+  status text not null default 'pending'
+    check (status in ('pending', 'approved', 'banned')),
+  role text not null default 'user'
+    check (role in ('user', 'admin')),
+  created_at timestamptz not null default now(),
+  approved_at timestamptz,
+  banned_at timestamptz
+);
+
+-- 2. Realtime untuk dashboard
+alter table public.profiles replica identity full;
+
+-- 3. Otomatis buat profile saat user daftar
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer set search_path = public
+as $$
+begin
+  insert into public.profiles (id, email, full_name)
+  values (
+    new.id,
+    new.email,
+    coalesce(new.raw_user_meta_data ->> 'full_name', '')
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row execute function public.handle_new_user();
+
+-- 4. Row Level Security
+alter table public.profiles enable row level security;
+
+-- User biasa: hanya bisa baca profile miliknya sendiri
+create policy "users read own profile"
+  on public.profiles for select
+  using (auth.uid() = id);
+
+-- Admin: bisa baca semua profile
+create policy "admin read all profiles"
+  on public.profiles for select
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin' and p.status = 'approved'
+    )
+  );
+
+-- Admin: bisa update status/role profile mana pun
+create policy "admin update profiles"
+  on public.profiles for update
+  using (
+    exists (
+      select 1 from public.profiles p
+      where p.id = auth.uid() and p.role = 'admin' and p.status = 'approved'
+    )
+  );
+
+-- 5. Cara menjadikan user pertama sebagai admin:
+--    Setelah membuat akun via aplikasi, jalankan:
+--    update public.profiles
+--    set role = 'admin', status = 'approved', approved_at = now()
+--    where email = 'EMAIL_ADMIN_KAMU@example.com';

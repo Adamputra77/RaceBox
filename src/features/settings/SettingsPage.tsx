@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useSettings } from '@/hooks/useSettings'
 import { useGPS } from '@/hooks/useGPS'
+import { useAuth } from '@/lib/auth/useAuth'
 import { Button } from '@/components/Button'
 import { Card } from '@/components/Card'
 import type { ThemePref } from '@/types'
@@ -24,6 +25,7 @@ const THEME_OPTIONS: Array<{ id: ThemePref; label: string }> = [
 export function SettingsPage() {
   const { settings, update } = useSettings()
   const { providerName } = useGPS()
+  const { isAdmin, profile, user, signOut, status } = useAuth()
   const fileRef = useRef<HTMLInputElement>(null)
   const [importMsg, setImportMsg] = useState<string | null>(null)
   const [confirmClear, setConfirmClear] = useState(false)
@@ -113,6 +115,30 @@ export function SettingsPage() {
         value={settings.gpsHighAccuracy ? 'yes' : 'no'}
         onChange={(v) => update({ gpsHighAccuracy: v === 'yes' })}
       />
+
+      <Card className="mt-5 p-4">
+        <p className="label mb-2">Account</p>
+        {status === 'unconfigured' ? (
+          <p className="text-xs text-[var(--color-race-muted)]">
+            Auth belum dikonfigurasi (Supabase key belum diisi).
+          </p>
+        ) : (
+          <div className="space-y-2">
+            <p className="truncate text-xs text-[var(--color-race-muted)]">
+              {user?.email}
+              {profile?.full_name ? ` · ${profile.full_name}` : ''}
+            </p>
+            {isAdmin && (
+              <Button variant="outline" full onClick={() => (window.location.href = '/admin')}>
+                ADMIN PANEL
+              </Button>
+            )}
+            <Button variant="outline" full onClick={() => void signOut()}>
+              LOGOUT
+            </Button>
+          </div>
+        )}
+      </Card>
 
       <Card className="mt-5 p-4">
         <p className="label mb-2">Theme</p>

@@ -2,7 +2,7 @@
 
 **RaceBox** adalah aplikasi performance measurement untuk motor dan mobil berbasis **Web/PWA** yang menggunakan **GPS perangkat** untuk mengukur kecepatan, jarak, waktu tempuh, dan performa drag race.
 
-Aplikasi berjalan **local-first**: semua data tersimpan di perangkat (IndexedDB), tanpa backend, tanpa login, tanpa API key.
+Aplikasi berjalan **local-first**: data rekaman tersimpan di perangkat (IndexedDB). Akses masuk dapat dikunci belakang **autentikasi + persetujuan admin** opsional berbasis **Supabase** (aktif bila `VITE_SUPABASE_URL` & `VITE_SUPABASE_ANON_KEY` diisi).
 
 > Pengukuran berbasis GPS smartphone. Akurasi tergantung kualitas sinyal GPS perangkat, lingkungan, dan jenis perangkat.
 
@@ -164,6 +164,40 @@ Unit test dijalankan pada modul kalkulasi:
 ```bash
 npm run test
 ```
+
+---
+
+## Autentikasi & Persetujuan Admin (Supabase)
+
+RaceBox dapat dikunci sehingga pengguna **harus daftar → disetujui admin → login** sebelum memakai aplikasi. Fitur ini **opsional** dan aktif hanya saat kedua env berikut diisi.
+
+### Setup sekali
+
+1. Buat project di [Supabase](https://supabase.com) (free tier cukup).
+2. Di **SQL Editor**, jalankan seluruh isi [`supabase/schema.sql`](supabase/schema.sql).
+   Skema ini membuat tabel `profiles` (status `pending`/`approved`/`banned`, role `user`/`admin`), trigger otomatis saat user daftar, dan aturan RLS.
+3. Salin `SUPABASE_URL` dan `SUPABASE_ANON_KEY` dari **Settings → API** ke `.env`:
+
+   ```bash
+   VITE_SUPABASE_URL=https://YOUR_PROJECT.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOi...
+   ```
+
+4. Jadikan user pertama sebagai admin (setelah mendaftar via aplikasi):
+
+   ```sql
+   update public.profiles
+   set role = 'admin', status = 'approved', approved_at = now()
+   where email = 'admin@example.com';
+   ```
+
+### Alur
+
+- **Daftar** → status `pending`, muncul layar "Menunggu Persetujuan Admin".
+- **Admin** → buka `/admin` atau link "Admin Panel" di Pengaturan → setujui/ban user.
+- **Login** → hanya berhasil bila status `approved`.
+
+> Tanpa env Supabase terisi, aplikasi berjalan dalam mode **tanpa login** (terbuka) seperti sebelumnya.
 
 ---
 
