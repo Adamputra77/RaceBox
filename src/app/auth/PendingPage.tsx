@@ -1,8 +1,17 @@
+import { useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/lib/auth/useAuth'
 import { Button } from '@/components/Button'
 
 export function PendingPage() {
-  const { profile, profileError, profileDebug, user, signOut } = useAuth()
+  const navigate = useNavigate()
+  const { status, profile, profileError, user, signOut } = useAuth()
+
+  useEffect(() => {
+    if (status === 'approved' || status === 'banned') {
+      navigate('/' + (status === 'banned' ? 'banned' : ''), { replace: true })
+    }
+  }, [status, navigate])
 
   const noDatabaseRow = profile == null && user != null
 
@@ -34,11 +43,6 @@ export function PendingPage() {
           Data profil tidak ditemukan di database. Hubungi admin (mungkin akun
           belum terhubung ke baris profile, atau hak akses database bermasalah).
         </p>
-      )}
-      {profileDebug && (
-        <pre className="mt-4 w-full max-w-sm overflow-auto rounded-lg border border-[var(--color-race-border)] bg-black/40 px-3 py-2 text-left text-[10px] leading-tight text-[var(--color-race-muted)]">
-          {JSON.stringify(profileDebug, null, 2)}
-        </pre>
       )}
       <div className="mt-8 w-full max-w-xs space-y-2">
         <Button full onClick={() => window.location.reload()}>

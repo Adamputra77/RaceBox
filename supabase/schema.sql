@@ -45,6 +45,13 @@ create trigger on_auth_user_created
 -- 4. Row Level Security
 alter table public.profiles enable row level security;
 
+-- Beri akses dasar ke role PostgREST. Tanpa grant ini, RLS policy tidak
+-- akan  mem-filter apa pun karena role anon/authenticated tidak punya
+-- privilege SELECT di tabel sama sekali -> hasilnya selalu 0 baris (tanpa error).
+grant select on public.profiles to anon, authenticated;
+grant update on public.profiles to authenticated;
+grant insert on public.profiles to authenticated;
+
 -- Helper admin: security definer -> menembus RLS (tanpa infinite recursion).
 -- Fungsi ini membaca tabel profiles dari role postgres (bypass RLS).
 create or replace function public.is_admin()
