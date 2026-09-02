@@ -2,7 +2,9 @@ import { useAuth } from '@/lib/auth/useAuth'
 import { Button } from '@/components/Button'
 
 export function PendingPage() {
-  const { profile, signOut } = useAuth()
+  const { profile, user, signOut } = useAuth()
+
+  const noDatabaseRow = profile == null && user != null
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-[var(--color-race-bg)] px-6 text-center text-[var(--color-race-text)]">
@@ -17,9 +19,15 @@ export function PendingPage() {
         Akun kamu belum disetujui admin. Setelah disetujui, kamu bisa login dan
         menggunakan RaceBox.
       </p>
-      {profile?.email && (
+      {user?.email && (
         <p className="mt-4 w-full max-w-xs truncate rounded-lg border border-[var(--color-race-border)] bg-[var(--color-race-card)] px-4 py-2 text-xs text-[var(--color-race-muted)]">
-          Akun: {profile.email}
+          Akun: {user.email}
+        </p>
+      )}
+      {noDatabaseRow && (
+        <p className="mt-3 w-full max-w-xs rounded-lg border border-[var(--color-race-red)]/40 bg-[var(--color-race-card)] px-4 py-2 text-xs text-[var(--color-race-red2)]">
+          Data profil tidak ditemukan di database. Hubungi admin (mungkin akun
+          belum terhubung ke baris profile, atau hak akses database bermasalah).
         </p>
       )}
       <div className="mt-8 w-full max-w-xs space-y-2">
