@@ -55,6 +55,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     void fetchProfile(session.user.id)
   }, [session, fetchProfile])
 
+  // Jika profil belum ketemu (mis. user dibuat manual / trigger belum jalan),
+  // coba ambil ulang beberapa kali supaya admin yang baru diset bisa langsung login.
+  useEffect(() => {
+    if (!session?.user || profile) return
+    const id = setInterval(() => {
+      void fetchProfile(session.user.id)
+    }, 2000)
+    return () => clearInterval(id)
+  }, [session, profile, fetchProfile])
+
   const signUp = useCallback(
     async (email: string, password: string, fullName: string) => {
       const { error } = await supabase.auth.signUp({
@@ -91,6 +101,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   else if (profile?.status === 'banned') status = 'banned'
   else if (profile?.status === 'approved') status = 'approved'
   else if (profile?.status === 'pending') status = 'pending'
+  // Ada session tapi profil tidak ditemukan (mis. user dibuat manual).
+  // Fallback ke pending agar tidak terjebak di "loading" selamanya.
+  else if (session?.user) status = 'pending'
 
   const isAdmin = profile?.role === 'admin' && profile?.status === 'approved'
 
