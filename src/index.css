@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+@theme {
+  --color-race-bg: #0a0a0a;
+  --color-race-card: #161616;
+  --color-race-card2: #1e1e1e;
+  --color-race-red: #e10600;
+  --color-race-red2: #ff2d1a;
+  --color-race-text: #f5f5f5;
+  --color-race-muted: #9c9c9c;
+  --color-race-green: #2ecc71;
+  --color-race-yellow: #f1c40f;
+  --color-race-amber: #f39c12;
+  --color-race-border: #2a2a2a;
+
+  --font-race: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Racing Sans One", "Arial Black", system-ui, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background-color: var(--color-race-bg);
+    color: var(--color-race-text);
+    font-family: var(--font-race);
+    overscroll-behavior-y: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100%;
+  }
+
+  button {
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  input,
+  button,
+  textarea,
+  select {
+    font: inherit;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-race-red);
+    outline-offset: 2px;
+  }
+}
+
+.input {
+  width: 100%;
+  height: 44px;
+  border-radius: 12px;
+  border: 1px solid var(--color-race-border);
+  background: var(--color-race-card2);
+  color: var(--color-race-text);
+  padding: 0 14px;
+  font-size: 15px;
+  outline: none;
+}
+.input:focus {
+  border-color: var(--color-race-red);
+}
+textarea.input {
+  height: auto;
+  padding-top: 10px;
+}
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-race-muted);
+}
+
+@layer utilities {
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .font-display {
+    font-family: var(--font-display);
+  }
+  .font-mono-r {
+    font-family: var(--font-mono);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .text-glow-red {
+    text-shadow: 0 0 24px rgba(225, 6, 0, 0.55);
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 28px 28px;
+  }
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 6px;
+  border-radius: 9999px;
+  background: var(--color-race-border);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--color-race-red);
+  border: 3px solid var(--color-race-bg);
+  box-shadow: 0 0 12px rgba(225, 6, 0, 0.6);
+}
