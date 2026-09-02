@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { useAuth } from '@/lib/auth/useAuth'
+import { formatAuthError } from '@/lib/auth/authErrors'
 
 export function LoginPage() {
   const navigate = useNavigate()
@@ -18,7 +19,7 @@ export function LoginPage() {
     const { error } = await signIn(email, password)
     setLoading(false)
     if (error) {
-      setError(error)
+      setError(formatAuthError(error))
       return
     }
     navigate('/', { replace: true })

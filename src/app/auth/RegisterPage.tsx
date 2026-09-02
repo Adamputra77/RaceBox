@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/Button'
 import { useAuth } from '@/lib/auth/useAuth'
+import { formatAuthError } from '@/lib/auth/authErrors'
 
 export function RegisterPage() {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export function RegisterPage() {
     const { error } = await signUp(email, password, name.trim())
     setLoading(false)
     if (error) {
-      setError(error)
+      setError(formatAuthError(error))
       return
     }
     setDone(true)
