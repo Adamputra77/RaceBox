@@ -9,6 +9,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<ProfileRow | null>(null)
   const [loading, setLoading] = useState(true)
   const [profileError, setProfileError] = useState<string | null>(null)
+  const [profileDebug, setProfileDebug] = useState<Record<string, unknown> | null>(null)
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -38,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('id', userId)
         .maybeSingle()
 
+      setProfileDebug({
+        uid: userId,
+        email,
+        byId: { count: byId.count, data: byId.data, error: byId.error },
+      })
+
       let row: ProfileRow | null = byId.error ? null : byId.data
 
       if (row == null && email) {
@@ -46,6 +53,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           .select('*')
           .ilike('email', email)
           .maybeSingle()
+        setProfileDebug((d) => ({
+          ...d,
+          byEmail: { count: byEmail.count, data: byEmail.data, error: byEmail.error },
+        }))
         if (byEmail.error) {
           setProfile(null)
           setProfileError(byEmail.error.message)
@@ -136,6 +147,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         user: session?.user ?? null,
         profile,
         profileError,
+        profileDebug,
         isAdmin,
         signUp,
         signIn,
