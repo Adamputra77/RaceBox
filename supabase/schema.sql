@@ -45,30 +45,38 @@ create trigger on_auth_user_created
 -- 4. Row Level Security
 alter table public.profiles enable row level security;
 
+-- Helper admin: security definer -> menembus RLS (tanpa infinite recursion).
+-- Fungsi ini membaca tabel profiles dari role postgres (bypass RLS).
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles p
+    where p.id = auth.uid()
+      and p.role = 'admin'
+      and p.status = 'approved'
+  );
+$$;
+
 -- User biasa: hanya bisa baca profile miliknya sendiri
 create policy "users read own profile"
   on public.profiles for select
   using (auth.uid() = id);
 
--- Admin: bisa baca semua profile
+-- Admin: bisa baca semua profile (via security definer, tanpa recursion)
 create policy "admin read all profiles"
   on public.profiles for select
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin' and p.status = 'approved'
-    )
-  );
+  using (public.is_admin());
 
 -- Admin: bisa update status/role profile mana pun
 create policy "admin update profiles"
   on public.profiles for update
-  using (
-    exists (
-      select 1 from public.profiles p
-      where p.id = auth.uid() and p.role = 'admin' and p.status = 'approved'
-    )
-  );
+  using (public.is_admin())
+  with check (public.is_admin());
 
 -- 5. Cara menjadikan user pertama sebagai admin:
 --    Setelah membuat akun via aplikasi, jalankan:
